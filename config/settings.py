@@ -31,6 +31,10 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://industrial-monitor.onrender.com",
+]
+
 
 # Application definition
 
