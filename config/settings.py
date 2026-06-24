@@ -32,7 +32,7 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://industrial-monitor.onrender.com",
+    "https://simulador-de-maquina-industrial.onrender.com",
 ]
 
 
