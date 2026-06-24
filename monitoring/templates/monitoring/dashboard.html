@@ -124,10 +124,16 @@ function updateStatus(machineId, status) {
         },
         body: `status=${status}`
     })
-    .then(res => res.json())
+    .then(response => {
+        console.log("HTTP STATUS:", response.status);
+        return response.json();
+    })
     .then(data => {
-        console.log(data);
+        console.log("RESPUESTA:", data);
         updateDashboard();
+    })
+    .catch(error => {
+        console.log("ERROR:", error);
     });
 
 }
@@ -141,10 +147,16 @@ function resetAlarm(machineId) {
             'X-CSRFToken': getCookie('csrftoken')
         }
     })
-    .then(res => res.json())
+    .then(response => {
+        console.log("HTTP STATUS:", response.status);
+        return response.json();
+    })
     .then(data => {
-        console.log(data.message);
+        console.log("RESPUESTA:", data);
         updateDashboard();
+    })
+    .catch(error => {
+        console.log("ERROR:", error);
     });
 
 }
