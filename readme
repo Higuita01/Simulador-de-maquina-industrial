@@ -1,0 +1,94 @@
+# Sistema de Monitoreo Industrial
+
+## Descripción
+
+Proyecto personal desarrollado con Django que simula una línea de producción industrial.
+
+El sistema permite monitorear máquinas con distintos estados operativos, generar producción en tiempo real y simular fallas automáticas que activan alarmas y bloquean el funcionamiento hasta su resolución.
+
+El objetivo del proyecto fue practicar conceptos relacionados con backend, actualización en tiempo real y lógica de control inspirada en sistemas de automatización industrial y SCADA.
+
+---
+
+## Características
+
+* Simulación de máquinas industriales.
+* Estados de máquina:
+
+  * Running
+  * Stopped
+  * Maintenance
+* Producción en tiempo real.
+* Generación automática de fallas.
+* Alarmas automáticas.
+* Bloqueo de arranque cuando existe una falla activa.
+* Reset manual de alarmas.
+* Dashboard con actualización dinámica sin recargar la página.
+* Modo de control manual y automático.
+
+---
+
+## Tecnologías utilizadas
+
+* Python
+* Django
+* JavaScript
+* HTML
+* CSS
+* SQLite
+
+---
+
+## Funcionamiento
+
+Cada máquina puede encontrarse en distintos estados operativos.
+
+Mientras está en estado **Running**, genera producción automáticamente.
+
+El sistema cuenta con un simulador de fallas que genera eventos aleatorios. Cuando ocurre una falla:
+
+1. Se crea una alarma.
+2. La máquina cambia automáticamente a estado **Maintenance**.
+3. Se bloquea el arranque hasta que la alarma sea resuelta.
+4. El operador puede realizar un reset manual para volver a habilitar la máquina.
+
+Toda esta información se refleja en un dashboard que se actualiza dinámicamente.
+
+---
+
+## Motivación
+
+Desarrollé este proyecto para acercarme al mundo de la automatización industrial desde el software.
+
+La idea fue replicar, a pequeña escala, la lógica de un sistema de monitoreo industrial tipo SCADA, incorporando manejo de estados, alarmas, simulación de procesos y visualización en tiempo real.
+
+---
+
+## Próximas mejoras
+
+* Historial de alarmas.
+* Registro de producción por períodos.
+* Gráficos de tendencias.
+* Sistema de usuarios y permisos.
+* Comunicación mediante protocolos industriales.
+
+---
+
+## Arquitectura
+
+Usuario
+   ↓
+Dashboard (HTML + JS)
+   ↓ fetch
+Django Views / API
+   ↓
+Modelos
+├── Machine
+├── Alarm
+└── Production
+
+Simulador
+   ↓
+Genera fallas y eventos
+   ↓
+Actualiza Machine y Alarm

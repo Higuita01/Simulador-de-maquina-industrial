@@ -1,0 +1,221 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Industrial Monitor</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<div class="header">
+    <h1>INDUSTRIAL MONITOR</h1>
+</div>
+
+<!-- KPI SECTION -->
+<div class="kpi-container">
+
+    <div class="kpi-card">
+        <h3>Producción Hoy</h3>
+        <div class="kpi-value" id="kpi-today">{{ today_production }}</div>
+    </div>
+
+    <div class="kpi-card">
+        <h3>Producción Mes</h3>
+        <div class="kpi-value" id="kpi-month">{{ month_production }}</div>
+    </div>
+
+</div>
+
+<!-- ALARMAS -->
+<div class="alarm-panel"></div>
+
+<!-- MACHINES -->
+<div class="section-title">
+    LÍNEAS DE PRODUCCIÓN
+</div>
+
+{% for machine in machines %}
+
+<div class="machine-card {{ machine.status }}" id="machine-{{ machine.id }}">
+
+    <div class="machine-header">
+        <span class="machine-name">{{ machine.name }}</span>
+
+        <span class="status-text" id="status-text-{{ machine.id }}">
+            {% if machine.status == 'running' %}
+                🟢 RUNNING
+            {% elif machine.status == 'stopped' %}
+                🔴 STOPPED
+            {% else %}
+                🟡 MAINTENANCE
+            {% endif %}
+        </span>
+    </div>
+
+    <div class="machine-info">
+        <p><strong>Producto:</strong> {{ machine.product_name }}</p>
+        <p><strong>Peso:</strong> {{ machine.product_weight }}</p>
+        <p><strong>Velocidad:</strong> {{ machine.production_rate_per_sec }} u/s</p>
+    </div>
+
+    <div class="controls">
+
+        <button onclick="updateStatus({{ machine.id }}, 'running')">
+            ▶ Start
+        </button>
+
+        <button onclick="updateStatus({{ machine.id }}, 'stopped')">
+            ⏸ Stop
+        </button>
+
+        <button onclick="updateStatus({{ machine.id }}, 'maintenance')">
+            🛠 Maintenance
+        </button>
+
+        <button onclick="resetAlarm({{ machine.id }})">
+            🔧 Reset Alarm
+        </button>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+<!-- ========================= -->
+<!-- JS -->
+<!-- ========================= -->
+
+<script>
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+</script>
+
+<!-- ========================= -->
+<!-- UPDATE MACHINE STATUS -->
+<!-- ========================= -->
+
+<script>
+
+function updateStatus(machineId, status) {
+
+    fetch(`/machine/${machineId}/status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `status=${status}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data);
+        updateDashboard();
+    });
+
+}
+
+function resetAlarm(machineId) {
+
+    fetch(`/machine/${machineId}/reset/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data.message);
+        updateDashboard();
+    });
+
+}
+
+</script>
+
+<!-- ========================= -->
+<!-- REAL TIME DASHBOARD -->
+<!-- ========================= -->
+
+<script>
+
+function updateDashboard() {
+
+    fetch('/api/state/')
+        .then(res => res.json())
+        .then(data => {
+
+            // =========================
+            // ALARMAS
+            // =========================
+            const alarmPanel = document.querySelector('.alarm-panel');
+
+            if (data.alarms.length > 0) {
+
+                let html = `<h2>🔴 ALARMAS ACTIVAS</h2>`;
+
+                data.alarms.forEach(alarm => {
+                    html += `
+                        <div class="alarm-item">
+                            <strong>Máquina ${alarm.machine_id}</strong> - ${alarm.alarm_type}
+                        </div>
+                    `;
+                });
+
+                alarmPanel.innerHTML = html;
+
+            } else {
+                alarmPanel.innerHTML = "";
+            }
+
+            // =========================
+            // MÁQUINAS
+            // =========================
+            data.machines.forEach(machine => {
+
+                const card = document.getElementById(`machine-${machine.id}`);
+                const statusText = document.getElementById(`status-text-${machine.id}`);
+
+                if (!card || !statusText) return;
+
+                card.classList.remove('running', 'stopped', 'maintenance');
+                card.classList.add(machine.status);
+
+                if (machine.status === 'running') {
+                    statusText.innerText = '🟢 RUNNING';
+                } else if (machine.status === 'stopped') {
+                    statusText.innerText = '🔴 STOPPED';
+                } else {
+                    statusText.innerText = '🟡 MAINTENANCE';
+                }
+            });
+
+        });
+
+}
+
+setInterval(updateDashboard, 2000);
+updateDashboard();
+
+</script>
+
+</body>
+</html>
