@@ -11,6 +11,17 @@ from .models import Machine, ProductionRecord, Alarm
 
 
 def dashboard(request):
+    
+    Machine.objects.get_or_create(
+    name="Línea Caramelos",
+    defaults={
+        "status": "stopped",                    
+        "product_name": "Caramelos",
+        "product_weight": "500g",
+        "production_rate_per_sec": 100,
+       }
+    )
+    
     machines = Machine.objects.all()
     now = timezone.now()
 
