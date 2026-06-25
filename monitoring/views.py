@@ -6,8 +6,7 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
 from .models import Machine, Alarm
 from django.views.decorators.csrf import ensure_csrf_cookie
-
-
+import random
 from .models import Machine, ProductionRecord, Alarm
 
 @ensure_csrf_cookie
@@ -131,8 +130,46 @@ def reset_machine_alarm(request, machine_id):
     
 def machines_state(request):
 
+    # =========================
+    # SIMULACIÓN DE PRODUCCIÓN
+    # =========================
+
+    running_machines = Machine.objects.filter(status='running')
+
+    for machine in running_machines:
+
+        ProductionRecord.objects.create(
+            machine=machine,
+            quantity=machine.production_rate_per_sec
+        )
+
+        # 2% de probabilidad de falla
+        if random.randint(1, 100) <= 2:
+
+            alarm_exists = Alarm.objects.filter(
+                machine=machine,
+                active=True
+            ).exists()
+
+            if not alarm_exists:
+
+                alarm_type = random.choice([
+                    'jam',
+                    'sensor',
+                    'paper'
+                ])
+
+                Alarm.objects.create(
+                    machine=machine,
+                    alarm_type=alarm_type,
+                    active=True
+                )
+
+                machine.status = 'maintenance'
+                machine.save()
+
     machines = list(Machine.objects.values())
-    
+
     alarms = list(
         Alarm.objects.filter(active=True).values(
             'id',
