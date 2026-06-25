@@ -224,6 +224,22 @@ function updateDashboard() {
 
         });
 
+    // =========================
+    // KPI EN TIEMPO REAL
+    // =========================
+
+    fetch('/api/kpis/')
+        .then(res => res.json())
+        .then(kpis => {
+
+            document.getElementById('kpi-today').innerText =
+                kpis.today_production;
+
+            document.getElementById('kpi-month').innerText =
+                kpis.month_production;
+
+        });
+
 }
 
 setInterval(updateDashboard, 2000);
