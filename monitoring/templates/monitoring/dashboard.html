@@ -124,16 +124,18 @@ function updateStatus(machineId, status) {
         },
         body: `status=${status}`
     })
-    .then(response => {
-        console.log("HTTP STATUS:", response.status);
-        return response.json();
+    .then(async res => {
+
+        console.log("HTTP STATUS:", res.status);
+
+        const text = await res.text();
+
+        console.log("SERVER RESPONSE:");
+        console.log(text);
+
     })
-    .then(data => {
-        console.log("RESPUESTA:", data);
-        updateDashboard();
-    })
-    .catch(error => {
-        console.log("ERROR:", error);
+    .catch(err => {
+        console.log("ERROR:", err);
     });
 
 }
